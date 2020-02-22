@@ -1,5 +1,4 @@
-﻿using System;
-
+using System;
 namespace DSTEd.Publisher
 {
     public static class Program
