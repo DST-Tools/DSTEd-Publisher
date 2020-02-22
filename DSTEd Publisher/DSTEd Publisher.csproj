@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <RootNamespace>DSTEd.Publisher</RootNamespace>
+        <OutputType>Exe</OutputType>
+        <StartupObject>DSTEd.Publisher.Program</StartupObject>
+        <Platforms>x64;x86</Platforms>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Condition="'$(PlatformName)' == 'x86'" Include="Steamworks.NET">
+            <HintPath>Libraries\Steamworks.NET.x86.dll</HintPath>
+        </Reference>
+        <Reference Condition="'$(PlatformName)' == 'x64'" Include="Steamworks.NET">
+            <HintPath>Libraries\Steamworks.NET.x64.dll</HintPath>
+        </Reference>
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="steam_appid.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+</Project>
