@@ -2,66 +2,72 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DSTEd.Publisher
-{
-    internal class ArgumentParser
-    {
-        /// <summary>
-        /// Command handler
-        /// </summary>
-        /// <param name="commandArgs">Arguments for this command</param>
-        /// <returns>Returns a value as exit code</returns>
+namespace DSTEd.Publisher {
+     abstract class ActionClass {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Arguments { get; set; }
+
+        public virtual int Run(string[] args) {
+            /* Override Me */
+            return -1;
+        }
+    }
+
+    internal class ArgumentParser {
         internal delegate int CommandHandler(string[] commandArgs);
 
-        Dictionary<string, CommandHandler> handlers = new Dictionary<string, CommandHandler>(4);
-        internal string HelpMessage { get; set; }
+        Dictionary<string, ActionClass> handlers = new Dictionary<string, ActionClass>(4);
 
-        internal void AddHandler(string command, CommandHandler handler)
-        {
+        internal void AddHandler(string command, ActionClass handler) {
             handlers.Add(command, handler);
         }
 
-        /// <summary>
-        /// Parser
-        /// </summary>
-        /// <param name="args">"string[] args" from Main</param>
-        internal int Parse(string[]? args)
-        {
-            for (int i = 1; i < args.Length; i++)
-            {
-                string str = args[i];
-                string command = null;
-                char firstChar = str[0];
+        internal int Parse(string[]? args) {
+            for(int position = 0; position < args.Length; ++position) {
+                string value    = args[position];
+                string command  = null;
+                char firstChar  = value[0];
 
-                if (firstChar == '-' || firstChar == '/')
-                    command = str.Substring(1);
-                else
-                {
-                    if (str.StartsWith("--"))
-                        command = str.Substring(2);
-                    else
+                if(!value.StartsWith("--") && (firstChar == '-' || firstChar == '/')) {
+                    command = value.Substring(1);
+                } else {
+                    if(value.StartsWith("--")) {
+                        command = value.Substring(2);
+                    } else {
                         continue;
+                    }
                 }
 
-                foreach (var kvPair in handlers)
-                    if (string.Compare(kvPair.Key, command, true) == 0)  
-                    {
-                        var commandArgs = new string[args.Length];
+                foreach(var pair in handlers) {
+                    if(string.Compare(pair.Key, command, true) == 0) {
+                        string[] commandArgs = new string[args.Length];
 
-                        for (int i2 = 0; i < commandArgs.Length; i++)
-                            commandArgs[i2] = args[i2 + i];
+                        for(int index = 0; position < commandArgs.Length; position++) {
+                            commandArgs[index] = args[index + position];
+                        }
 
-                        return kvPair.Value(commandArgs);
+                        return pair.Value.Run(commandArgs);
                     }
+                }
 
-                Console.WriteLine("Command not found, here is the help.\n");
-                Console.WriteLine(HelpMessage);
+                Help();
                 return 0;
             }
 
-            Console.WriteLine("No Command provided, here is the help.\n");
-            Console.WriteLine(HelpMessage);
+            Help();
             return 0;
+        }
+
+        private void Help() {
+            Console.WriteLine("DSTEd Publisher version " + typeof(Program).Assembly.GetName().Version.ToString()  + "\n");
+            Console.WriteLine("Usage:\n");
+            Console.WriteLine("Publisher.exe");
+
+            foreach (var pair in handlers) {
+                Console.WriteLine("\n\t--" + pair.Value.Name + " " + pair.Value.Arguments);
+                Console.WriteLine("\n\t\t" + pair.Value.Description);
+            }
         }
     }
 }

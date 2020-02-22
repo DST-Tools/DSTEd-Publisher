@@ -5,6 +5,7 @@
         <OutputType>Exe</OutputType>
         <StartupObject>DSTEd.Publisher.Program</StartupObject>
         <Platforms>x64;x86</Platforms>
+        <AssemblyName>Publisher</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
         <Reference Condition="'$(PlatformName)' == 'x86'" Include="Steamworks.NET">
