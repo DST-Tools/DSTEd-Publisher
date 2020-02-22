@@ -1,40 +1,25 @@
+using DSTEd.Publisher.Actions;
 using System;
-namespace DSTEd.Publisher
-{
-    public static class Program
-    {
-        static int Update(string[] commandArgs)
-        {
-            return 0;
-        }
-        static string Help_enUS = "";
 
-        public static int Main(string[] args)
-        {
-            try
-            {
-                var parser = new ArgumentParser();
-                string language = System.Globalization.CultureInfo.CurrentCulture.EnglishName;
-                try
-                {
-                    using var reader = new System.IO.StreamReader(".\\help-" + language);
-                    parser.HelpMessage = reader.ReadToEnd();
-                }
-                catch (System.IO.FileNotFoundException)
-                {
-                    parser.HelpMessage = Help_enUS;
-                    throw;
-                }
-                parser.AddHandler("update", Update);
-
+namespace DSTEd.Publisher {
+    public static class Program {
+        public static int Main(string[] args) {
+            try {
+                var parser      = new ArgumentParser();
+               
+                parser.AddHandler("update",     new Update());
+                parser.AddHandler("upload",     new Upload());
+                parser.AddHandler("download",   new Download());
+                parser.AddHandler("status",     new Status());
+                parser.AddHandler("list",       new List());
+                parser.AddHandler("version",    new Software());
 
                 return parser.Parse(args);
+            } catch(Exception ex) {
+                /* Do Nothing */
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return ex.HResult;
-            }
+
+            return 0;
         }
     }
 }

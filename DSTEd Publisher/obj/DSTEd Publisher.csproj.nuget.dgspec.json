@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\adria\\source\\repos\\DSTEd Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj": {}
+    "C:\\Users\\adria\\source\\repos\\DSTEd-Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj": {}
   },
   "projects": {
-    "C:\\Users\\adria\\source\\repos\\DSTEd Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj": {
+    "C:\\Users\\adria\\source\\repos\\DSTEd-Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\adria\\source\\repos\\DSTEd Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj",
-        "projectName": "DSTEd Publisher",
-        "projectPath": "C:\\Users\\adria\\source\\repos\\DSTEd Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj",
+        "projectUniqueName": "C:\\Users\\adria\\source\\repos\\DSTEd-Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj",
+        "projectName": "Publisher",
+        "projectPath": "C:\\Users\\adria\\source\\repos\\DSTEd-Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj",
         "packagesPath": "C:\\Users\\adria\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\adria\\source\\repos\\DSTEd Publisher\\DSTEd Publisher\\obj\\",
+        "outputPath": "C:\\Users\\adria\\source\\repos\\DSTEd-Publisher\\DSTEd Publisher\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\adria\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -37,6 +37,12 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
