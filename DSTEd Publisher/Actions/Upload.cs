@@ -10,7 +10,7 @@ namespace DSTEd.Publisher.Actions {
             this.Arguments      = "<Directory>";
         }
 
-        public override int Run(string[] args) {
+        public override int Run(string[] arguments) {
             Console.WriteLine("--upload <Directory> is currently not implemented.");
             return 0;
         }

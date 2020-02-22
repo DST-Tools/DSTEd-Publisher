@@ -8,28 +8,25 @@ namespace DSTEd.Publisher {
         public string Description { get; set; }
         public string Arguments { get; set; }
 
-        public virtual int Run(string[] args) {
+        public virtual int Run(string[] arguments) {
             /* Override Me */
             return -1;
         }
     }
 
     internal class ArgumentParser {
-        internal delegate int CommandHandler(string[] commandArgs);
+        List<ActionClass> handlers = new List<ActionClass>(4);
 
-        Dictionary<string, ActionClass> handlers = new Dictionary<string, ActionClass>(4);
-
-        internal void AddHandler(string command, ActionClass handler) {
-            handlers.Add(command, handler);
+        internal void AddHandler(ActionClass handler) {
+            handlers.Add(handler);
         }
 
         internal int Parse(string[]? args) {
             for(int position = 0; position < args.Length; ++position) {
                 string value    = args[position];
                 string command  = null;
-                char firstChar  = value[0];
 
-                if(!value.StartsWith("--") && (firstChar == '-' || firstChar == '/')) {
+                if(!value.StartsWith("--") && (value[0] == '-' || value[0] == '/')) {
                     command = value.Substring(1);
                 } else {
                     if(value.StartsWith("--")) {
@@ -40,14 +37,14 @@ namespace DSTEd.Publisher {
                 }
 
                 foreach(var pair in handlers) {
-                    if(string.Compare(pair.Key, command, true) == 0) {
-                        string[] commandArgs = new string[args.Length];
+                    if(string.Compare(pair.Name, command, true) == 0) {
+                        string[] arguments = new string[args.Length];
 
-                        for(int index = 0; position < commandArgs.Length; position++) {
-                            commandArgs[index] = args[index + position];
+                        for(int index = 0; position < arguments.Length; position++) {
+                            arguments[index] = args[index + position];
                         }
 
-                        return pair.Value.Run(commandArgs);
+                        return pair.Run(arguments);
                     }
                 }
 
@@ -65,8 +62,8 @@ namespace DSTEd.Publisher {
             Console.WriteLine("Publisher.exe");
 
             foreach (var pair in handlers) {
-                Console.WriteLine("\n\t--" + pair.Value.Name + " " + pair.Value.Arguments);
-                Console.WriteLine("\n\t\t" + pair.Value.Description);
+                Console.WriteLine("\n\t--" + pair.Name + " " + pair.Arguments);
+                Console.WriteLine("\n\t\t" + pair.Description);
             }
         }
     }

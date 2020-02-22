@@ -9,7 +9,7 @@ namespace DSTEd.Publisher.Actions {
             this.Description    = "Displays the version information for the Publisher.";
         }
 
-        public override int Run(string[] args) {
+        public override int Run(string[] arguments) {
             Console.WriteLine("Version " + typeof(Program).Assembly.GetName().Version.ToString()  + "\n");
             return 0;
         }

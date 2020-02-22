@@ -10,7 +10,7 @@ namespace DSTEd.Publisher.Actions {
             this.Arguments      = "<ID>";
         }
 
-        public override int Run(string[] args) {
+        public override int Run(string[] arguments) {
             Console.WriteLine("--download <ID> is currently not implemented.");
             return 0;
         }

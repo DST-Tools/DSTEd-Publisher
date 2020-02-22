@@ -9,7 +9,7 @@ namespace DSTEd.Publisher.Actions {
             this.Description    = "Displays the complete status of all uploaded Steam-WorkShop items and local projects.";
         }
 
-        public override int Run(string[] args) {
+        public override int Run(string[] arguments) {
             Console.WriteLine("--status is currently not implemented.");
             return 0;
         }

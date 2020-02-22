@@ -10,7 +10,7 @@ namespace DSTEd.Publisher.Actions {
             this.Arguments      = "<Directory|ID>";
         }
 
-        public override int Run(string[] args) {
+        public override int Run(string[] arguments) {
             Console.WriteLine("--update <Directory|ID> is currently not implemented.");
             return 0;
         }

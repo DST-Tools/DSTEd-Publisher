@@ -7,15 +7,15 @@ namespace DSTEd.Publisher {
             try {
                 var parser      = new ArgumentParser();
                
-                parser.AddHandler("update",     new Update());
-                parser.AddHandler("upload",     new Upload());
-                parser.AddHandler("download",   new Download());
-                parser.AddHandler("status",     new Status());
-                parser.AddHandler("list",       new List());
-                parser.AddHandler("version",    new Software());
+                parser.AddHandler(new Update());
+                parser.AddHandler(new Upload());
+                parser.AddHandler(new Download());
+                parser.AddHandler(new Status());
+                parser.AddHandler(new List());
+                parser.AddHandler(new Software());
 
                 return parser.Parse(args);
-            } catch(Exception ex) {
+            } catch(Exception e) {
                 /* Do Nothing */
             }
 

@@ -9,7 +9,7 @@ namespace DSTEd.Publisher.Actions {
             this.Description    = "Displays a list of all published Steam-WorkShop items.";
         }
 
-        public override int Run(string[] args) {
+        public override int Run(string[] arguments) {
             Console.WriteLine("--list is currently not implemented.");
             return 0;
         }
