@@ -13,6 +13,7 @@
         </Reference>
         <Reference Condition="'$(PlatformName)' == 'x64'" Include="Steamworks.NET">
             <HintPath>Libraries\Steamworks.NET.x64.dll</HintPath>
+            <Private>false</Private>
         </Reference>
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     </ItemGroup>
@@ -21,4 +22,7 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="md &quot;$(OutDir)Libraries\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\Steamworks.NET.$(PlatformName).dll&quot; &quot;$(OutDir)Libraries\Steamworks.NET.dll&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api.dll&quot; &quot;$(OutDir)Libraries\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api64.dll&quot; &quot;$(OutDir)Libraries\&quot;" />
+    </Target>
 </Project>
