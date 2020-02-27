@@ -10,7 +10,7 @@ namespace DSTEd.Publisher.Actions {
         }
 
         public override int Run(string[] arguments) {
-            Console.WriteLine("Version " + typeof(Program).Assembly.GetName().Version.ToString()  + "\n");
+            Console.WriteLine("Version " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString()  + "\n");
             return 0;
         }
     }

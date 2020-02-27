@@ -16,7 +16,8 @@ namespace DSTEd.Publisher {
 
                 return parser.Parse(args);
             } catch(Exception e) {
-                /* Do Nothing */
+                System.Diagnostics.Debug.WriteLine(e.ToString());
+                System.Diagnostics.Debugger.Break();
             }
 
             return 0;

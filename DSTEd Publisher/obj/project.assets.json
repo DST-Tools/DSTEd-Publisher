@@ -10,6 +10,22 @@
         "runtime": {
           "lib/netstandard2.0/Newtonsoft.Json.dll": {}
         }
+      },
+      "Steamworks.NET.Standard.x86/14.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/Steamworks.NET.Standard.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/Steamworks.NET.Standard.dll": {}
+        },
+        "contentFiles": {
+          "contentFiles/any/netstandard2.1/steam_appid.txt": {
+            "buildAction": "Content",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          }
+        }
       }
     }
   },
@@ -44,27 +60,45 @@
         "newtonsoft.json.nuspec",
         "packageIcon.png"
       ]
+    },
+    "Steamworks.NET.Standard.x86/14.0.0": {
+      "sha512": "pUfxH1aBl1C1OaiLTaKHNpSkxOBg3lMOJV+PEK0ci4GcA4cY+aQMG3vXY9vwRxy55Dt/omFPxnZNgA1f2t28RA==",
+      "type": "package",
+      "path": "steamworks.net.standard.x86/14.0.0",
+      "files": [
+        ".nupkg.metadata",
+        "content/steam_appid.txt",
+        "contentFiles/any/netstandard2.1/steam_appid.txt",
+        "lib/netstandard2.1/Steamworks.NET.Standard.dll",
+        "steamworks.net.standard.x86.14.0.0.nupkg.sha512",
+        "steamworks.net.standard.x86.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
-      "Newtonsoft.Json >= 12.0.3"
+      "Newtonsoft.Json >= 12.0.3",
+      "Steamworks.NET.Standard.x86 >= 14.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\adria\\.nuget\\packages\\": {}
+    "C:\\Users\\12072\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\adria\\source\\repos\\DSTEd-Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj",
+      "projectUniqueName": "D:\\DSTEd-Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj",
       "projectName": "Publisher",
-      "projectPath": "C:\\Users\\adria\\source\\repos\\DSTEd-Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj",
-      "packagesPath": "C:\\Users\\adria\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\adria\\source\\repos\\DSTEd-Publisher\\DSTEd Publisher\\obj\\",
+      "projectPath": "D:\\DSTEd-Publisher\\DSTEd Publisher\\DSTEd Publisher.csproj",
+      "packagesPath": "C:\\Users\\12072\\.nuget\\packages\\",
+      "outputPath": "D:\\DSTEd-Publisher\\DSTEd Publisher\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
       "configFilePaths": [
-        "C:\\Users\\adria\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\12072\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -72,7 +106,10 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "https://api.nuget.org/v3/index.json": {}
+        "E:\\VCPKG\\scripts\\buildsystems": {},
+        "E:\\nuget包": {},
+        "https://api.nuget.org/v3/index.json": {},
+        "https://mirrors.cloud.tencent.com/nuget/": {}
       },
       "frameworks": {
         "netcoreapp3.1": {
@@ -91,6 +128,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[12.0.3, )"
+          },
+          "Steamworks.NET.Standard.x86": {
+            "target": "Package",
+            "version": "[14.0.0, )"
           }
         },
         "imports": [
@@ -108,7 +149,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.101\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.102\\RuntimeIdentifierGraph.json"
       }
     }
   }

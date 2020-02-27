@@ -1,7 +1,9 @@
 {
   "profiles": {
     "DSTEd Publisher": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "/list",
+      "workingDirectory": "$(projectdir)"
     }
   }
 }
