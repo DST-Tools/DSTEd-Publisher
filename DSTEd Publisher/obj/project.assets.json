@@ -10,6 +10,22 @@
         "runtime": {
           "lib/netstandard2.0/Newtonsoft.Json.dll": {}
         }
+      },
+      "Steamworks.NET.Standard.x86/14.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/Steamworks.NET.Standard.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/Steamworks.NET.Standard.dll": {}
+        },
+        "contentFiles": {
+          "contentFiles/any/netstandard2.1/steam_appid.txt": {
+            "buildAction": "Content",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          }
+        }
       }
     }
   },
@@ -44,11 +60,25 @@
         "newtonsoft.json.nuspec",
         "packageIcon.png"
       ]
+    },
+    "Steamworks.NET.Standard.x86/14.0.0": {
+      "sha512": "pUfxH1aBl1C1OaiLTaKHNpSkxOBg3lMOJV+PEK0ci4GcA4cY+aQMG3vXY9vwRxy55Dt/omFPxnZNgA1f2t28RA==",
+      "type": "package",
+      "path": "steamworks.net.standard.x86/14.0.0",
+      "files": [
+        ".nupkg.metadata",
+        "content/steam_appid.txt",
+        "contentFiles/any/netstandard2.1/steam_appid.txt",
+        "lib/netstandard2.1/Steamworks.NET.Standard.dll",
+        "steamworks.net.standard.x86.14.0.0.nupkg.sha512",
+        "steamworks.net.standard.x86.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
-      "Newtonsoft.Json >= 12.0.3"
+      "Newtonsoft.Json >= 12.0.3",
+      "Steamworks.NET.Standard.x86 >= 14.0.0"
     ]
   },
   "packageFolders": {
@@ -98,6 +128,10 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[12.0.3, )"
+          },
+          "Steamworks.NET.Standard.x86": {
+            "target": "Package",
+            "version": "[14.0.0, )"
           }
         },
         "imports": [

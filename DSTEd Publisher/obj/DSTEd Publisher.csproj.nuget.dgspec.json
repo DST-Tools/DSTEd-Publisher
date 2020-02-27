@@ -47,6 +47,10 @@
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[12.0.3, )"
+            },
+            "Steamworks.NET.Standard.x86": {
+              "target": "Package",
+              "version": "[14.0.0, )"
             }
           },
           "imports": [
