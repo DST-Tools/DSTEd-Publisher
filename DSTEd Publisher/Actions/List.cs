@@ -10,85 +10,82 @@ namespace DSTEd.Publisher.Actions {
             this.Arguments        = "<Begin page (optional)>";
         }
 
-        private static int exitcode = 0;//everything ok
-        private static bool finished = false;
-        private static void OnGetList(RemoteStorageEnumerateWorkshopFilesResult_t result, bool ioFail)
+        private int exitcode = 0;//everything ok
+        private bool finished = false;
+        private uint page = 1;
+        private void OnGetListUGC(SteamUGCQueryCompleted_t queryResult, bool ioFail)
         {
-            if (ioFail)
+            if(ioFail)
             {
-                Console.WriteLine("Failed to communicate with steam workshop");
+                Console.WriteLine("Failed to communicate with steam workshop.");
                 exitcode = (int)ExitCodes.SteamIOError;
                 finished = true;
                 return;
             }
 
-            if(result.m_eResult != EResult.k_EResultOK)
+            if(queryResult.m_eResult != EResult.k_EResultOK)
             {
-                Console.WriteLine("Query failed, reason: " + result.m_eResult.ToString());
+                Console.WriteLine($"Query Failed. EResult is {queryResult.m_eResult}");
                 exitcode = (int)ExitCodes.QueryWorkshopFail;
                 finished = true;
                 return;
             }
-            Console.WriteLine("You have {0} mod published on DST workshop", result.m_nTotalResultCount);
 
-            var callResults = new CallResult<RemoteStorageGetPublishedFileDetailsResult_t>[result.m_rgPublishedFileId.Length];
+            Console.WriteLine($"You have published {queryResult.m_unTotalMatchingResults} in total.\n" +
+                $"This is page {page}");
 
-            int queryDetailsFinishedCount = 0;
-            for (int i = 0; i < result.m_rgPublishedFileId.Length; i++)
+            for (uint i = 0; i < queryResult.m_unNumResultsReturned; i++)
             {
-                callResults[i] = new CallResult<RemoteStorageGetPublishedFileDetailsResult_t>(
-                    delegate (RemoteStorageGetPublishedFileDetailsResult_t modDetails, bool ioFail)
-                    {
-                        if(ioFail)
-                        {
-                            Console.WriteLine("Failed to get details from steam. The mod ID is " + modDetails.m_nPublishedFileId);
-                            return;
-                        }
-
-                        if(modDetails.m_nConsumerAppID == new AppId_t(322330))
-                            Console.WriteLine(
-                                "Title: {0}\n" +
-                                "Tags: {1}\n" +
-                                "Description:\n{2}\n" +
-                                "ID: {3}\n",
-                                modDetails.m_rgchTitle,
-                                modDetails.m_rgchTags,
-                                modDetails.m_rgchDescription,
-                                modDetails.m_nPublishedFileId
-                                );
-                        queryDetailsFinishedCount++;
-                    });
+                SteamUGCDetails_t details;
+                SteamUGC.GetQueryUGCResult(queryResult.m_handle, i, out details);
+                if (details.m_nConsumerAppID == new AppId_t(322330) && details.m_eFileType == EWorkshopFileType.k_EWorkshopFileTypeCommunity)
+                    Console.WriteLine(
+                        $"Mod {details.m_nPublishedFileId}:\n" +
+                        $"Title: {details.m_rgchTitle}\n" +
+                        $"Description: {details.m_rgchDescription}\n" +
+                        $"Tags: {details.m_rgchTags}\n\n"
+                        );
             }
-
-            do
-                System.Threading.Thread.Sleep(100); 
-            while (queryDetailsFinishedCount != result.m_rgPublishedFileId.Length);
 
             finished = true;
         }
 
         public override int Run(string[] arguments) {
-            //Console.WriteLine("--list is currently not implemented.");
-            uint begin = 0;
-
             SteamAPI.Init();
 
-            if (arguments.Length > 1)
-                begin = uint.Parse(arguments[1]);
-            
-            var handle = SteamRemoteStorage.EnumerateUserPublishedFiles(begin);
-            var callResult = new CallResult<RemoteStorageEnumerateWorkshopFilesResult_t>(OnGetList);
+            if (arguments.Length > 0)
+                page = uint.Parse(arguments[0]);
+
+            var ugcQueryhandle = SteamUGC.CreateQueryUserUGCRequest(
+                SteamUser.GetSteamID().GetAccountID(),
+                EUserUGCList.k_EUserUGCList_Published,
+                EUGCMatchingUGCType.k_EUGCMatchingUGCType_Items,
+                EUserUGCListSortOrder.k_EUserUGCListSortOrder_CreationOrderDesc,
+                new AppId_t(245850), new AppId_t(322330),
+                page
+                );
+
+            SteamUGC.SetReturnLongDescription(ugcQueryhandle, true);
+
+            var handle = SteamUGC.SendQueryUGCRequest(ugcQueryhandle);
+
+            var callResult = new CallResult<SteamUGCQueryCompleted_t>(OnGetListUGC);
             callResult.Set(handle);
+
+            //[Akarinnnnn(Fa)]
+            //This is very important to setup Steamworks API. DO NOT remove it.
+            //I don't know why, but it works.
+            System.Threading.Thread.Sleep(1500);
 
             new System.Threading.Thread(()=>
             SteamAPI.RunCallbacks())
                 .Start();
 
             do
-            {
-                System.Threading.Thread.Sleep(100);
-            } while (!finished);
+                System.Threading.Thread.Yield();
+            while (!finished);
 
+            SteamUGC.ReleaseQueryUGCRequest(ugcQueryhandle);
             SteamAPI.Shutdown();
 
             return exitcode;
