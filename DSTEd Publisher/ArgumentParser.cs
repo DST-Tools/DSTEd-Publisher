@@ -8,10 +8,7 @@ namespace DSTEd.Publisher {
         public string Description { get; set; }
         public string Arguments { get; set; }
 
-        public virtual int Run(string[] arguments) {
-            /* Override Me */
-            return -1;
-        }
+        public abstract int Run(string[] arguments);
     }
 
     internal class ArgumentParser {
