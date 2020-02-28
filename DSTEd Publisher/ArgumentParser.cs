@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+#nullable enable
 
 namespace DSTEd.Publisher {
      abstract class ActionClass {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Arguments { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Arguments { get; set; } = string.Empty;
 
         public abstract int Run(string[] arguments);
     }
@@ -18,10 +19,11 @@ namespace DSTEd.Publisher {
             handlers.Add(handler);
         }
 
-        internal int Parse(string[]? args) {
+        //args can't be null.
+        internal int Parse(string[] args) {
             for(int position = 0; position < args.Length; ++position) {
                 string value    = args[position];
-                string command  = null;
+                string command  = string.Empty;
 
                 if(!value.StartsWith("--") && (value[0] == '-' || value[0] == '/')) {
                     command = value.Substring(1);
@@ -33,9 +35,10 @@ namespace DSTEd.Publisher {
 
                 foreach(var entry in handlers) {
                     if(string.Compare(entry.Name, command, true) == 0) {
-                        string[] arguments = new string[args.Length];
+                        string[] arguments = new string[args.Length - position - 1];
 
-                        for(int index = 0; position < arguments.Length; position++) {
+                        //index begins with 1, so "/command" will not bring into argument
+                        for(int index = 1; position < arguments.Length; position++) {
                             arguments[index] = args[index + position];
                         }
 
@@ -53,7 +56,9 @@ namespace DSTEd.Publisher {
 
         private void Help() {
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("DSTEd Publisher version " + typeof(Program).Assembly.GetName().Version.ToString()  + "\n");
+#pragma warning disable CS8602 // This chain will never get a null value
+            Console.WriteLine("DSTEd Publisher version " + System.Reflection.Assembly.GetCallingAssembly().GetName().Version.ToString()  + "\n");
+#pragma warning restore CS8602 
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Usage:");
             Console.ForegroundColor = ConsoleColor.White;
