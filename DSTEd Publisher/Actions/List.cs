@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+//using System.Text;
 using Steamworks;
 namespace DSTEd.Publisher.Actions {
     class List : ActionClass {
@@ -31,23 +31,46 @@ namespace DSTEd.Publisher.Actions {
                 return;
             }
 
-            Console.WriteLine($"You have published {queryResult.m_unTotalMatchingResults} in total.\n" +
-                $"This is page {page}");
+            Console.WriteLine($"You have published {queryResult.m_unTotalMatchingResults} mod(s) in total.\n" +
+                $"This is page {page} (50 per page)");
 
             for (uint i = 0; i < queryResult.m_unNumResultsReturned; i++)
             {
-                SteamUGCDetails_t details;
-                SteamUGC.GetQueryUGCResult(queryResult.m_handle, i, out details);
+                SteamUGC.GetQueryUGCResult(queryResult.m_handle, i, out SteamUGCDetails_t details);
                 if (details.m_nConsumerAppID == new AppId_t(322330) && details.m_eFileType == EWorkshopFileType.k_EWorkshopFileTypeCommunity)
-                    Console.WriteLine(
-                        $"Mod {details.m_nPublishedFileId}:\n" +
-                        $"Title: {details.m_rgchTitle}\n" +
-                        $"Description: {details.m_rgchDescription}\n" +
-                        $"Tags: {details.m_rgchTags}\n\n"
-                        );
+                {
+                    WriteFieldName("mod ID");
+                    WriteFieldValue(details.m_nPublishedFileId.ToString());
+
+                    WriteFieldName("Title");
+                    WriteFieldValue(details.m_rgchTags);
+
+                    WriteFieldName("Description");
+                    WriteFieldValue(details.m_rgchDescription);
+
+                    WriteFieldName("Tags");
+                    WriteFieldValue(details.m_rgchTags);
+                }
+
             }
 
             finished = true;
+        }
+
+        private static void WriteFieldName(string field)
+        {
+            var foreground = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(field + " :\n");
+            Console.ForegroundColor = foreground;
+        }
+
+        private static void WriteFieldValue(string val)
+        {
+            var foreground = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(val + '\n');
+            Console.ForegroundColor = foreground;
         }
 
         public override int Run(string[] arguments) {
