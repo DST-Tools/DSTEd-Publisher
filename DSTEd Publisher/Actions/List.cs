@@ -43,13 +43,15 @@ namespace DSTEd.Publisher.Actions {
                     WriteFieldValue(details.m_nPublishedFileId.ToString());
 
                     WriteFieldName("Title");
-                    WriteFieldValue(details.m_rgchTags);
+                    WriteFieldValue(details.m_rgchTitle);
 
                     WriteFieldName("Description");
                     WriteFieldValue(details.m_rgchDescription);
 
                     WriteFieldName("Tags");
                     WriteFieldValue(details.m_rgchTags);
+
+                    Console.WriteLine();
                 }
 
             }
