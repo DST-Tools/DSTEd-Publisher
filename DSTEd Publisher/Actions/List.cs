@@ -10,7 +10,6 @@ namespace DSTEd.Publisher.Actions {
             this.Arguments        = "<Begin page (optional)>";
         }
 
-        private int exitcode = 0;//everything ok
         private bool finished = false;
         private uint page = 1;
         private void OnGetListUGC(SteamUGCQueryCompleted_t queryResult, bool ioFail)
@@ -18,7 +17,7 @@ namespace DSTEd.Publisher.Actions {
             if(ioFail)
             {
                 Console.WriteLine("Failed to communicate with steam workshop.");
-                exitcode = (int)ExitCodes.SteamIOError;
+                ExitCode = (int)ExitCodes.SteamIOError;
                 finished = true;
                 return;
             }
@@ -26,7 +25,7 @@ namespace DSTEd.Publisher.Actions {
             if(queryResult.m_eResult != EResult.k_EResultOK)
             {
                 Console.WriteLine($"Query Failed. EResult is {queryResult.m_eResult}");
-                exitcode = (int)ExitCodes.QueryWorkshopFail;
+                ExitCode = (int)ExitCodes.QueryWorkshopFail;
                 finished = true;
                 return;
             }
@@ -113,7 +112,7 @@ namespace DSTEd.Publisher.Actions {
             SteamUGC.ReleaseQueryUGCRequest(ugcQueryhandle);
             SteamAPI.Shutdown();
 
-            return exitcode;
+            return ExitCode;
         }
     }
 }
