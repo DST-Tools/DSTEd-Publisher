@@ -8,6 +8,7 @@ namespace DSTEd.Publisher {
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Arguments { get; set; } = string.Empty;
+        protected int ExitCode = (int)Actions.ExitCodes.NoError;
 
         public abstract int Run(string[] arguments);
     }
