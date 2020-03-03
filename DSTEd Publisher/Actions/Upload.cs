@@ -1,15 +1,13 @@
 ﻿using System;
-using System.IO.Compression;
-using System.IO;
-using System.Collections.Generic;
-
 using Steamworks;
+using static DSTEd.Publisher.SteamWorkshop.Steam;
 
 namespace DSTEd.Publisher.Actions {
     class Upload : ActionClass {
         private bool UploadFinished = false;
         private string ModFolder;
         private int RetryTimes = 0;
+        private int ExitCode;
         private UGCUpdateHandle_t updateHandle;
         public Upload() {
             this.Name           = "upload";
@@ -154,7 +152,10 @@ namespace DSTEd.Publisher.Actions {
             }
             ModFolder = arguments[0];
 
-            SteamAPI.Init();
+            if(!SteamAPI.Init()) {
+                Console.WriteLine("Steam is not running...");
+                return -1;
+            }
 
             var handle = SteamUGC.CreateItem(new AppId_t(322330), EWorkshopFileType.k_EWorkshopFileTypeCommunity);
 

@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using DSTEd.Publisher.SteamWorkshop;
 
 namespace DSTEd.Publisher.Actions {
     class Status : ActionClass {
@@ -10,6 +9,15 @@ namespace DSTEd.Publisher.Actions {
         }
 
         public override int Run(string[] arguments) {
+            if(!Steam.Start()) {
+                Console.WriteLine("Steam is not running...");
+                return -1;
+            }
+
+            // @ToDo implementation
+
+            Steam.Stop();
+
             Console.WriteLine("--status is currently not implemented.");
             return 0;
         }
