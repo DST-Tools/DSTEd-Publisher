@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace DSTEd.Publisher.SteamWorkshop {
+    [Serializable]//serialize it to send back DSTEd
     public class WorkshopItem {
         public int ID { get; set; }
         public String Title { get; set; }
