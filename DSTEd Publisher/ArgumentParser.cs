@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 #nullable enable
 
 namespace DSTEd.Publisher {
@@ -8,13 +7,12 @@ namespace DSTEd.Publisher {
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Arguments { get; set; } = string.Empty;
-        protected int ExitCode = (int)Actions.ExitCodes.NoError;
 
         public abstract int Run(string[] arguments);
     }
 
     internal class ArgumentParser {
-        List<ActionClass> handlers = new List<ActionClass>(900);
+        List<ActionClass> handlers = new List<ActionClass>(10);
 
         internal void AddHandler(ActionClass handler) {
             handlers.Add(handler);
