@@ -19,12 +19,7 @@
         <HintPath>Libraries\Steamworks.NET64.dll</HintPath>
       </Reference>
     </ItemGroup>
-    <ItemGroup>
-      <None Update="steam_appid.txt">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-      <Exec Command="copy &quot;$(ProjectDir)Libraries\Steamworks.NET.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\Steamworks.NET64.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api64.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)steam_appid.txt&quot; &quot;$(OutDir)\&quot;" />
+      <Exec Command="copy &quot;$(ProjectDir)Libraries\Steamworks.NET.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\Steamworks.NET64.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api64.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;" />
     </Target>
 </Project>

@@ -152,7 +152,7 @@ namespace DSTEd.Publisher.Actions {
             }
             ModFolder = arguments[0];
 
-            if(!SteamAPI.Init()) {
+            if(!Start(APP_ID)) {
                 Console.WriteLine("Steam is not running...");
                 return -1;
             }

@@ -36,9 +36,8 @@ namespace DSTEd.Publisher {
                     if(string.Compare(entry.Name, command, true) == 0) {
                         string[] arguments = new string[args.Length - position - 1];
 
-                        //index begins with 1, so "/command" will not bring into argument
-                        for(int index = 1; position < arguments.Length; position++) {
-                            arguments[index] = args[index + position];
+                        for(int index = 0; position + index < arguments.Length; index++) {
+                            arguments[index] = args[position + index + 1];
                         }
 
                         return entry.Run(arguments);
