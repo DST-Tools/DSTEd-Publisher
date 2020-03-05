@@ -13,7 +13,7 @@ namespace DSTEd.Publisher.Actions {
         public override int Run(string[] arguments) {
             uint page = 1;
 
-            if(!Steam.Start()) {
+            if(!Steam.Start(Steam.APP_ID)) {
                 Console.WriteLine("Steam is not running...");
                 return -1;
             }
@@ -24,11 +24,13 @@ namespace DSTEd.Publisher.Actions {
 
             Console.WriteLine("Page: " + page);
 
-            Steam.GetWorkShopItems(page, delegate(int error, List<WorkshopItem> results, uint count, uint total) {
+            Steam.GetWorkShopItems(page, delegate(Steam.ExitCodes error, List<WorkshopItem> results, uint count, uint total) {
+#if DEBUG
                 Console.WriteLine("Callback");
+#endif
 
                 if (error != 0) {
-                    Console.WriteLine("Some UGC Error! (Code: " + error + ")");
+                    Console.WriteLine($"Some UGC Error! (Code: {error}");
                     return;
                 }
 

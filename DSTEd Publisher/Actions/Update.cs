@@ -10,7 +10,7 @@ namespace DSTEd.Publisher.Actions {
         }
 
         public override int Run(string[] arguments) {
-            if(!Steam.Start()) {
+            if(!Steam.Start(Steam.APP_ID)) {
                 Console.WriteLine("Steam is not running...");
                 return -1;
             }
