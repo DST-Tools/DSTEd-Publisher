@@ -1,18 +1,23 @@
 ﻿using System;
+using System.IO;
 using Steamworks;
 using static DSTEd.Publisher.SteamWorkshop.Steam;
 
 namespace DSTEd.Publisher.Actions {
     class Upload : ActionClass {
         private bool UploadFinished = false;
-        private string ModFolder;
+        
+        private string ContentDirectory;
+        private string PreviewFile;//necessary
+        private string Title;
+
         private int RetryTimes = 0;
         private int ExitCode;
         private UGCUpdateHandle_t updateHandle;
         public Upload() {
             this.Name           = "upload";
             this.Description    = "Uploads a new Steam-WorkShop item.";
-            this.Arguments      = "<Directory>";
+            this.Arguments      = "<Content Directory | Preview File | Title>";
         }
 
         private string GetCreateErrorText(EResult error)
@@ -117,7 +122,7 @@ namespace DSTEd.Publisher.Actions {
                 if(result.m_eResult == EResult.k_EResultTimeout && RetryTimes <= 3)
                 {
                     RetryTimes++;
-                    var handle = SteamUGC.CreateItem(new AppId_t(322330), EWorkshopFileType.k_EWorkshopFileTypeCommunity);
+                    var handle = SteamUGC.CreateItem(APP_GAME, EWorkshopFileType.k_EWorkshopFileTypeCommunity);
                     var createResult = new CallResult<CreateItemResult_t>(OnCreateItemFinished);
                     createResult.Set(handle);
                     return;
@@ -137,38 +142,65 @@ namespace DSTEd.Publisher.Actions {
 
             RetryTimes = 0;
 
-            updateHandle = SteamUGC.StartItemUpdate(new AppId_t(322330), result.m_nPublishedFileId);
-            SteamUGC.SetItemContent(updateHandle, ModFolder);
+            updateHandle = SteamUGC.StartItemUpdate(APP_GAME, result.m_nPublishedFileId);
 
-            var submitHande = SteamUGC.SubmitItemUpdate(updateHandle, string.Empty);
+            // steam reports "No workshop depots found."
+            //if (!SteamUGC.SetItemContent(updateHandle, Path.GetFullPath(ContentDirectory)))
+            //    Console.WriteLine("Failed to set files to update");
+
+            if (!SteamUGC.SetItemPreview(updateHandle, Path.GetFullPath(PreviewFile)))
+                Console.WriteLine("Failed to set preview file");
+
+            if (!SteamUGC.SetItemTitle(updateHandle, Title))
+                Console.WriteLine("Failed to set mod title");
+
+            if (!SteamUGC.SetItemVisibility(updateHandle, ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPublic))
+                Console.WriteLine("Failed to Set Item visibility");
+
+            var submitHandle = SteamUGC.SubmitItemUpdate(updateHandle, "Initial commit");
             var submitResult = new CallResult<SubmitItemUpdateResult_t>(OnSubmitFinished);
-            submitResult.Set(submitHande);
+            submitResult.Set(submitHandle);
         }
         public override int Run(string[] arguments) {
-            if (arguments.Length < 1)
+            if (arguments.Length < 3)
             {
-                Console.WriteLine("Argument #1\"Directory\" is necessary");
+                Console.WriteLine("Argument #1\"Content Directory\", #2\"Preview File\" and #3\"Title\" are necessary");
                 return (int)ExitCodes.ArgumentsMissing;
             }
-            ModFolder = arguments[0];
 
-            if(!Start(APP_ID)) {
+            ContentDirectory = arguments[0];
+            PreviewFile = arguments[1];
+            Title = arguments[2];
+
+            if (!Start(APP_ID)) {
                 Console.WriteLine("Steam is not running...");
-                return -1;
+                return (int)ExitCodes.InitSteamFailed;
             }
 
-            var handle = SteamUGC.CreateItem(new AppId_t(322330), EWorkshopFileType.k_EWorkshopFileTypeCommunity);
+            var handle = SteamUGC.CreateItem(APP_GAME,
+                EWorkshopFileType.k_EWorkshopFileTypeCommunity);
 
             new CallResult<CreateItemResult_t>(OnCreateItemFinished).Set(handle);
             System.Threading.Thread.Sleep(1500);
+
+            new System.Threading.Thread( delegate () {
+                while (true) {
+                    SteamAPI.RunCallbacks();
+                    System.Threading.Thread.Sleep(100);
+                }
+            }).Start();
 
             do
             {
                 if(updateHandle.m_UGCUpdateHandle != 0xfffffffffffffffful)
                 {
                     System.Threading.Thread.Sleep(200);
-                    SteamUGC.GetItemUpdateProgress(updateHandle, out ulong proceed, out ulong total);
-                    Console.WriteLine($"{(decimal)proceed / total}%\tUploaded {proceed} bytes, {total} in total.");
+                    EItemUpdateStatus status = SteamUGC.GetItemUpdateProgress(updateHandle, out ulong proceed, out ulong total);
+
+                    if (status == EItemUpdateStatus.k_EItemUpdateStatusInvalid && !UploadFinished)
+                        continue;
+                    else
+                        Console.WriteLine($"{(decimal)proceed / total}%\tUploaded {proceed} bytes, {total} in total.");
                 }
             } while (!UploadFinished);
 
