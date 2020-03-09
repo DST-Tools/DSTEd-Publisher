@@ -22,6 +22,8 @@ namespace DSTEd.Publisher.SteamWorkshop {
             SubmitWorkshopFail      = ErrorCodeBase + 7,
             InvalidArgument            = ErrorCodeBase + 8, 
             DownLoadFail                = ErrorCodeBase + 9,
+            SetNewContentFail        = ErrorCodeBase + 10,
+            UploadNewContentFail  = ErrorCodeBase + 11, 
         }
 
         public static bool Start(AppId_t appId) {
@@ -52,9 +54,14 @@ namespace DSTEd.Publisher.SteamWorkshop {
             SteamAPI.Shutdown();
         }
 
-        private static void Run() {
+        public static void Run() {
             System.Threading.Thread.Sleep(1500);
-            new System.Threading.Thread(() => SteamAPI.RunCallbacks()).Start();
+            new System.Threading.Thread(delegate() {
+                while (true)
+                {
+                    System.Threading.Thread.Sleep(100);
+                    SteamAPI.RunCallbacks();
+                }}).Start();
         }
 
         public static void GetWorkShopItems(uint page = 1, Action<ExitCodes, List<WorkshopItem>, uint, uint> Callback = null) {
