@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using DSTEd.Publisher.SteamWorkshop;
 using Steamworks;
 using static DSTEd.Publisher.SteamWorkshop.Steam;
 
@@ -96,6 +97,7 @@ namespace DSTEd.Publisher.Actions {
             {
                 Console.WriteLine("Failed to communicate with workshop.");
                 ExitCode = (int)ExitCodes.SteamIOError;
+                return;
             }
 
             if (result.m_eResult != EResult.k_EResultOK)
@@ -104,22 +106,53 @@ namespace DSTEd.Publisher.Actions {
                     GetSubmitErrorText(result.m_eResult)
                     );
                 ExitCode = (int)ExitCodes.SubmitWorkshopFail;
+                return;
             }
 
             UploadFinished = true;
         }
+
+        private void OnUploadContentFinished(RemoteStorageUpdatePublishedFileResult_t result, bool ioFail)
+        {
+            if (ioFail)
+            {
+                Console.WriteLine("Failed to communicate with workshop.");
+                ExitCode = (int)ExitCodes.SteamIOError;
+                return;
+            }
+
+            if(result.m_eResult!=EResult.k_EResultOK)
+            {
+                Console.WriteLine($"Upload content failed, {GetSubmitErrorText(result.m_eResult)}");
+                ExitCode = (int)ExitCodes.UploadNewContentFail;
+                return;
+            }
+            Console.WriteLine("Successfully uploaded your mod.");
+            if(result.m_bUserNeedsToAcceptWorkshopLegalAgreement)
+                Console.WriteLine("Finally you just have to agree Workshop Legal Agreement");
+        }
+
+        private void FailDelete(PublishedFileId_t id)
+        {
+            var result = new CallResult<DeleteItemResult_t>(delegate (DeleteItemResult_t result, bool ioFail)
+            {
+                UploadFinished = true;
+            });
+            result.Set(SteamUGC.DeleteItem(id));
+        }
+
         private void OnCreateItemFinished(CreateItemResult_t result, bool ioFail)
         {
-            if(ioFail)
+            if (ioFail)
             {
                 Console.WriteLine("Failed to communicate with workshop.");
                 ExitCode = (int)ExitCodes.SteamIOError;
             }
 
-            if(result.m_eResult != EResult.k_EResultOK)
+            if (result.m_eResult != EResult.k_EResultOK)
             {
                 //retry 3 times.
-                if(result.m_eResult == EResult.k_EResultTimeout && RetryTimes <= 3)
+                if (result.m_eResult == EResult.k_EResultTimeout && RetryTimes <= 3)
                 {
                     RetryTimes++;
                     var handle = SteamUGC.CreateItem(APP_GAME, EWorkshopFileType.k_EWorkshopFileTypeCommunity);
@@ -147,15 +180,42 @@ namespace DSTEd.Publisher.Actions {
             // steam reports "No workshop depots found."
             //if (!SteamUGC.SetItemContent(updateHandle, Path.GetFullPath(ContentDirectory)))
             //    Console.WriteLine("Failed to set files to update");
-
-            if (!SteamUGC.SetItemPreview(updateHandle, Path.GetFullPath(PreviewFile)))
-                Console.WriteLine("Failed to set preview file");
+            if (PreviewFile != string.Empty)
+            {
+                if (!SteamUGC.SetItemPreview(updateHandle, Path.GetFullPath(PreviewFile)))
+                    Console.WriteLine(
+                        "Failed to set preview file\n" +
+                        "You can to upload your preview by mod webpage later."
+                        );
+            }
+            else
+            {
+                Console.WriteLine("You can to upload your preview by mod webpage later.");
+            }
 
             if (!SteamUGC.SetItemTitle(updateHandle, Title))
                 Console.WriteLine("Failed to set mod title");
 
             if (!SteamUGC.SetItemVisibility(updateHandle, ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPublic))
                 Console.WriteLine("Failed to Set Item visibility");
+
+            {
+                var contentUpdateHandle = SteamRemoteStorage.CreatePublishedFileUpdateRequest(result.m_nPublishedFileId);
+                if(!SteamRemoteStorage.UpdatePublishedFileFile(contentUpdateHandle, "mod_publish_data_file.zip"))
+                {
+                    Console.WriteLine("Update mod content failed, upload aborted.");
+                    
+                    //these may release some steam resources.
+                    SteamUGC.SubmitItemUpdate(updateHandle,"FAIL");
+                    SteamRemoteStorage.CommitPublishedFileUpdate(contentUpdateHandle);
+                    
+                    ExitCode = (int)ExitCodes.SetNewContentFail;
+                    FailDelete(result.m_nPublishedFileId);
+                    return;
+                }
+                var apicallHandle = SteamRemoteStorage.CommitPublishedFileUpdate(contentUpdateHandle);
+                new CallResult<RemoteStoragePublishFileProgress_t>()
+            }
 
             var submitHandle = SteamUGC.SubmitItemUpdate(updateHandle, "Initial commit");
             var submitResult = new CallResult<SubmitItemUpdateResult_t>(OnSubmitFinished);
@@ -181,28 +241,12 @@ namespace DSTEd.Publisher.Actions {
                 EWorkshopFileType.k_EWorkshopFileTypeCommunity);
 
             new CallResult<CreateItemResult_t>(OnCreateItemFinished).Set(handle);
-            System.Threading.Thread.Sleep(1500);
 
-            new System.Threading.Thread( delegate () {
-                while (true) {
-                    SteamAPI.RunCallbacks();
-                    System.Threading.Thread.Sleep(100);
-                }
-            }).Start();
+            Steam.Run();
 
-            do
-            {
-                if(updateHandle.m_UGCUpdateHandle != 0xfffffffffffffffful)
-                {
-                    System.Threading.Thread.Sleep(200);
-                    EItemUpdateStatus status = SteamUGC.GetItemUpdateProgress(updateHandle, out ulong proceed, out ulong total);
+            
 
-                    if (status == EItemUpdateStatus.k_EItemUpdateStatusInvalid && !UploadFinished)
-                        continue;
-                    else
-                        Console.WriteLine($"{(decimal)proceed / total}%\tUploaded {proceed} bytes, {total} in total.");
-                }
-            } while (!UploadFinished);
+            
 
             return ExitCode;
         }
