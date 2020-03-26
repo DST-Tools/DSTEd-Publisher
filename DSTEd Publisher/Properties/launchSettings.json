@@ -2,8 +2,9 @@
   "profiles": {
     "DSTEd Publisher": {
       "commandName": "Project",
-      "commandLineArgs": "/download 1579583001 K:\\DownloadTest\\",
-      "workingDirectory": "$(outdir)"
+      "commandLineArgs": "/download 2036195225 .\\dl\\",
+      "workingDirectory": "$(outdir)",
+      "nativeDebugging": false
     }
   }
 }
