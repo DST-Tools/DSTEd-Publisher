@@ -9,7 +9,7 @@ namespace DSTEd.Publisher.SteamWorkshop {
         private static Action[] handles; // TODO handle Observing!
         internal static AppId_t APP_ID       = new AppId_t(245850);
         internal static AppId_t APP_GAME     = new AppId_t(322330);
-
+        private static bool TimeToStop = false;
         public enum ExitCodes : int {
             NoError                        = 0,
             ErrorCodeBase              = unchecked((int) 0xA7FF0000),
@@ -51,13 +51,14 @@ namespace DSTEd.Publisher.SteamWorkshop {
         }
 
         public static void Stop() {
+            TimeToStop = true;
             SteamAPI.Shutdown();
         }
 
         public static void Run() {
             System.Threading.Thread.Sleep(1500);
             new System.Threading.Thread(delegate() {
-                while (true)
+                while (!TimeToStop)
                 {
                     System.Threading.Thread.Sleep(100);
                     SteamAPI.RunCallbacks();
