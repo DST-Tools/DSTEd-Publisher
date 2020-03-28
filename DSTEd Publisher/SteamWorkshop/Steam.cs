@@ -23,7 +23,8 @@ namespace DSTEd.Publisher.SteamWorkshop {
             InvalidArgument            = ErrorCodeBase + 8, 
             DownLoadFail                = ErrorCodeBase + 9,
             SetNewContentFail        = ErrorCodeBase + 10,
-            UploadNewContentFail  = ErrorCodeBase + 11, 
+            UploadNewContentFail  = ErrorCodeBase + 11,
+            SizeTooLarge                 = ErrorCodeBase + 12,
         }
 
         public static bool Start(AppId_t appId) {

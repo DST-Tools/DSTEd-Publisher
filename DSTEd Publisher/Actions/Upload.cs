@@ -97,6 +97,7 @@ namespace DSTEd.Publisher.Actions {
             {
                 Console.WriteLine("Failed to communicate with workshop.");
                 ExitCode = (int)ExitCodes.SteamIOError;
+                UploadFinished = true;
                 return;
             }
 
@@ -106,6 +107,7 @@ namespace DSTEd.Publisher.Actions {
                     GetSubmitErrorText(result.m_eResult)
                     );
                 ExitCode = (int)ExitCodes.SubmitWorkshopFail;
+                UploadFinished = true;
                 return;
             }
 
@@ -118,6 +120,7 @@ namespace DSTEd.Publisher.Actions {
             {
                 Console.WriteLine("Failed to communicate with workshop.");
                 ExitCode = (int)ExitCodes.SteamIOError;
+                UploadFinished = true;
                 return;
             }
 
@@ -125,6 +128,7 @@ namespace DSTEd.Publisher.Actions {
             {
                 Console.WriteLine($"Upload content failed, {GetSubmitErrorText(result.m_eResult)}");
                 ExitCode = (int)ExitCodes.UploadNewContentFail;
+                UploadFinished = true;
                 return;
             }
             Console.WriteLine("Successfully uploaded your mod.");
@@ -147,6 +151,7 @@ namespace DSTEd.Publisher.Actions {
             {
                 Console.WriteLine("Failed to communicate with workshop.");
                 ExitCode = (int)ExitCodes.SteamIOError;
+                UploadFinished = true;
             }
 
             if (result.m_eResult != EResult.k_EResultOK)
@@ -160,17 +165,21 @@ namespace DSTEd.Publisher.Actions {
                     createResult.Set(handle);
                     return;
                 }
-                else
+                
+                if(RetryTimes > 3)
                 {
                     Console.WriteLine(GetCreateErrorText(EResult.k_EResultTimeout));
                     ExitCode = (int)ExitCodes.TimedOut;
                     UploadFinished = true;
+                    return;
                 }
 
                 Console.WriteLine("Some error happened while creating your mod.\n" +
                     GetCreateErrorText(result.m_eResult)
                     );
                 ExitCode = (int)ExitCodes.CreateWorkshopFileFail;
+                UploadFinished = true;
+                return;
             }
 
             RetryTimes = 0;
@@ -196,7 +205,8 @@ namespace DSTEd.Publisher.Actions {
             if (!SteamUGC.SetItemTitle(updateHandle, Title))
                 Console.WriteLine("Failed to set mod title");
 
-            if (!SteamUGC.SetItemVisibility(updateHandle, ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPublic))
+            if (!SteamUGC.SetItemVisibility(updateHandle,
+                ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPrivate))
                 Console.WriteLine("Failed to Set Item visibility");
 
             {
@@ -211,10 +221,11 @@ namespace DSTEd.Publisher.Actions {
                     
                     ExitCode = (int)ExitCodes.SetNewContentFail;
                     FailDelete(result.m_nPublishedFileId);
+                    UploadFinished = true;
                     return;
                 }
                 var apicallHandle = SteamRemoteStorage.CommitPublishedFileUpdate(contentUpdateHandle);
-                new CallResult<RemoteStoragePublishFileProgress_t>()
+                new CallResult<RemoteStorageUpdatePublishedFileResult_t>(OnUploadContentFinished).Set(apicallHandle);
             }
 
             var submitHandle = SteamUGC.SubmitItemUpdate(updateHandle, "Initial commit");
@@ -232,10 +243,24 @@ namespace DSTEd.Publisher.Actions {
             PreviewFile = arguments[1];
             Title = arguments[2];
 
+            File.Delete("./modcontent.zip");
+            System.IO.Compression.ZipFile.CreateFromDirectory(ContentDirectory, "./modcontent.zip");
+
+            byte[] content = File.ReadAllBytes("./modcontent.zip");
+
+            if(content.Length > 100000000)
+            {
+                Console.WriteLine("The size of mod zip is too large, it should be under 95.36MiB(100000000 bytes in exact)");
+                return (int)ExitCodes.SizeTooLarge;
+            }
+
             if (!Start(APP_ID)) {
                 Console.WriteLine("Steam is not running...");
                 return (int)ExitCodes.InitSteamFailed;
             }
+
+            SteamRemoteStorage.FileWrite("mod_publish_data_file.zip", content, content.Length);
+            SteamRemoteStorage.FileDelete("mod_publish_preview.jpg");
 
             var handle = SteamUGC.CreateItem(APP_GAME,
                 EWorkshopFileType.k_EWorkshopFileTypeCommunity);
@@ -244,9 +269,12 @@ namespace DSTEd.Publisher.Actions {
 
             Steam.Run();
 
+            do
+            {
+                System.Threading.Thread.Sleep(100);
+            } while (!UploadFinished);
             
-
-            
+            Stop();
 
             return ExitCode;
         }
