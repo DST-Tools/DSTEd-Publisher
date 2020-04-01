@@ -2,8 +2,8 @@
   "profiles": {
     "DSTEd Publisher": {
       "commandName": "Project",
-      "commandLineArgs": "/upload K:\\mod\\upload_test\\content k:\\mod\\upload_test\\preview.png DSTEd-Publisher-Test",
-      "workingDirectory": "$(outdir)"
+      "workingDirectory": "$(outdir)",
+      "nativeDebugging": true
     }
   }
 }
