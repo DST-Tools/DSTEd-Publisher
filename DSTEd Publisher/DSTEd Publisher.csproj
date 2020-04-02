@@ -8,18 +8,14 @@
         <AssemblyName>Publisher</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
-		
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     </ItemGroup>
     <ItemGroup>
-      <Reference Condition="'$(platform)' == 'x86'" Include="Steamworks.NET">
-        <HintPath>Libraries\Steamworks.NET.dll</HintPath>
-      </Reference>
-	  <Reference Condition="'$(platform)' == 'x64'" Include="Steamworks.NET">
-        <HintPath>Libraries\Steamworks.NET64.dll</HintPath>
-      </Reference>
+      <PackageReference Include="Steamworks.NET.Standard.Windows.$(platform)" Version="15.0.1.4" Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' " />
+      <PackageReference Include="Steamworks.NET.Standard.OSX-Linux.$(platform)" Version="15.0.1.4" Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' " />
+      <PackageReference Include="Steamworks.NET.Standard.OSX-Linux.$(platform)" Version="15.0.1.4" Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' " />
     </ItemGroup>
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-      <Exec Command="copy &quot;$(ProjectDir)Libraries\Steamworks.NET.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\Steamworks.NET64.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api64.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;" />
+      <Exec Command="#copy &quot;$(ProjectDir)Libraries\Steamworks.NET.Standard.$(Platform).dll&quot; &quot;$(OutDir)&quot;&#xD;&#xA;#copy &quot;$(Projectdir)Libraries\Steamworks.NET.Standard.deps.json&quot; &quot;$(outdir)&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;copy &quot;$(ProjectDir)Libraries\steam_api64.dll&quot; &quot;$(OutDir)\&quot;&#xD;&#xA;" />
     </Target>
 </Project>

@@ -2,9 +2,8 @@
   "profiles": {
     "DSTEd Publisher": {
       "commandName": "Project",
-      "commandLineArgs": "/download 2036195225 .\\dl\\",
       "workingDirectory": "$(outdir)",
-      "nativeDebugging": false
+      "nativeDebugging": true
     }
   }
 }

@@ -1,18 +1,24 @@
 ﻿using System;
+using System.IO;
+using DSTEd.Publisher.SteamWorkshop;
 using Steamworks;
 using static DSTEd.Publisher.SteamWorkshop.Steam;
 
 namespace DSTEd.Publisher.Actions {
     class Upload : ActionClass {
         private bool UploadFinished = false;
-        private string ModFolder;
+        
+        private string ContentDirectory;
+        private string PreviewFile;//necessary
+        private string Title;
+
         private int RetryTimes = 0;
         private int ExitCode;
         private UGCUpdateHandle_t updateHandle;
         public Upload() {
             this.Name           = "upload";
             this.Description    = "Uploads a new Steam-WorkShop item.";
-            this.Arguments      = "<Directory>";
+            this.Arguments      = "<Content Directory | Preview File | Title>";
         }
 
         private string GetCreateErrorText(EResult error)
@@ -91,6 +97,8 @@ namespace DSTEd.Publisher.Actions {
             {
                 Console.WriteLine("Failed to communicate with workshop.");
                 ExitCode = (int)ExitCodes.SteamIOError;
+                UploadFinished = true;
+                return;
             }
 
             if (result.m_eResult != EResult.k_EResultOK)
@@ -99,78 +107,174 @@ namespace DSTEd.Publisher.Actions {
                     GetSubmitErrorText(result.m_eResult)
                     );
                 ExitCode = (int)ExitCodes.SubmitWorkshopFail;
+                UploadFinished = true;
+                return;
             }
 
             UploadFinished = true;
         }
-        private void OnCreateItemFinished(CreateItemResult_t result, bool ioFail)
+
+        private void OnUploadContentFinished(RemoteStorageUpdatePublishedFileResult_t result, bool ioFail)
         {
-            if(ioFail)
+            if (ioFail)
             {
                 Console.WriteLine("Failed to communicate with workshop.");
                 ExitCode = (int)ExitCodes.SteamIOError;
+                UploadFinished = true;
+                return;
             }
 
-            if(result.m_eResult != EResult.k_EResultOK)
+            if(result.m_eResult!=EResult.k_EResultOK)
+            {
+                Console.WriteLine($"Upload content failed, {GetSubmitErrorText(result.m_eResult)}");
+                ExitCode = (int)ExitCodes.UploadNewContentFail;
+                UploadFinished = true;
+                return;
+            }
+            Console.WriteLine("Successfully uploaded your mod.");
+            if(result.m_bUserNeedsToAcceptWorkshopLegalAgreement)
+                Console.WriteLine("Finally you just have to agree Workshop Legal Agreement");
+        }
+
+        private void FailDelete(PublishedFileId_t id)
+        {
+            var result = new CallResult<DeleteItemResult_t>(delegate (DeleteItemResult_t result, bool ioFail)
+            {
+                UploadFinished = true;
+            });
+            result.Set(SteamUGC.DeleteItem(id));
+        }
+
+        private void OnCreateItemFinished(CreateItemResult_t result, bool ioFail)
+        {
+            if (ioFail)
+            {
+                Console.WriteLine("Failed to communicate with workshop.");
+                ExitCode = (int)ExitCodes.SteamIOError;
+                UploadFinished = true;
+            }
+
+            if (result.m_eResult != EResult.k_EResultOK)
             {
                 //retry 3 times.
-                if(result.m_eResult == EResult.k_EResultTimeout && RetryTimes <= 3)
+                if (result.m_eResult == EResult.k_EResultTimeout && RetryTimes <= 3)
                 {
                     RetryTimes++;
-                    var handle = SteamUGC.CreateItem(new AppId_t(322330), EWorkshopFileType.k_EWorkshopFileTypeCommunity);
+                    var handle = SteamUGC.CreateItem(APP_GAME, EWorkshopFileType.k_EWorkshopFileTypeCommunity);
                     var createResult = new CallResult<CreateItemResult_t>(OnCreateItemFinished);
                     createResult.Set(handle);
                     return;
                 }
-                else
+                
+                if(RetryTimes > 3)
                 {
                     Console.WriteLine(GetCreateErrorText(EResult.k_EResultTimeout));
                     ExitCode = (int)ExitCodes.TimedOut;
                     UploadFinished = true;
+                    return;
                 }
 
                 Console.WriteLine("Some error happened while creating your mod.\n" +
                     GetCreateErrorText(result.m_eResult)
                     );
                 ExitCode = (int)ExitCodes.CreateWorkshopFileFail;
+                UploadFinished = true;
+                return;
             }
 
             RetryTimes = 0;
 
-            updateHandle = SteamUGC.StartItemUpdate(new AppId_t(322330), result.m_nPublishedFileId);
-            SteamUGC.SetItemContent(updateHandle, ModFolder);
+            updateHandle = SteamUGC.StartItemUpdate(APP_GAME, result.m_nPublishedFileId);
 
-            var submitHande = SteamUGC.SubmitItemUpdate(updateHandle, string.Empty);
+            // steam reports "No workshop depots found."
+            //if (!SteamUGC.SetItemContent(updateHandle, Path.GetFullPath(ContentDirectory)))
+            //    Console.WriteLine("Failed to set files to update");
+            if (PreviewFile != string.Empty)
+            {
+                if (!SteamUGC.SetItemPreview(updateHandle, Path.GetFullPath(PreviewFile)))
+                    Console.WriteLine(
+                        "Failed to set preview file\n" +
+                        "You can to upload your preview by mod webpage later."
+                        );
+            }
+            else
+            {
+                Console.WriteLine("You can to upload your preview by mod webpage later.");
+            }
+
+            if (!SteamUGC.SetItemTitle(updateHandle, Title))
+                Console.WriteLine("Failed to set mod title");
+
+            if (!SteamUGC.SetItemVisibility(updateHandle,
+                ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPrivate))
+                Console.WriteLine("Failed to Set Item visibility");
+
+            {
+                var contentUpdateHandle = SteamRemoteStorage.CreatePublishedFileUpdateRequest(result.m_nPublishedFileId);
+                if(!SteamRemoteStorage.UpdatePublishedFileFile(contentUpdateHandle, "mod_publish_data_file.zip"))
+                {
+                    Console.WriteLine("Update mod content failed, upload aborted.");
+                    
+                    //these may release some steam resources.
+                    SteamUGC.SubmitItemUpdate(updateHandle,"FAIL");
+                    SteamRemoteStorage.CommitPublishedFileUpdate(contentUpdateHandle);
+                    
+                    ExitCode = (int)ExitCodes.SetNewContentFail;
+                    FailDelete(result.m_nPublishedFileId);
+                    UploadFinished = true;
+                    return;
+                }
+                var apicallHandle = SteamRemoteStorage.CommitPublishedFileUpdate(contentUpdateHandle);
+                new CallResult<RemoteStorageUpdatePublishedFileResult_t>(OnUploadContentFinished).Set(apicallHandle);
+            }
+
+            var submitHandle = SteamUGC.SubmitItemUpdate(updateHandle, "Initial commit");
             var submitResult = new CallResult<SubmitItemUpdateResult_t>(OnSubmitFinished);
-            submitResult.Set(submitHande);
+            submitResult.Set(submitHandle);
         }
         public override int Run(string[] arguments) {
-            if (arguments.Length < 1)
+            if (arguments.Length < 3)
             {
-                Console.WriteLine("Argument #1\"Directory\" is necessary");
+                Console.WriteLine("Argument #1\"Content Directory\", #2\"Preview File\" and #3\"Title\" are necessary");
                 return (int)ExitCodes.ArgumentsMissing;
             }
-            ModFolder = arguments[0];
 
-            if(!Start(APP_ID)) {
-                Console.WriteLine("Steam is not running...");
-                return -1;
+            ContentDirectory = arguments[0];
+            PreviewFile = arguments[1];
+            Title = arguments[2];
+
+            File.Delete("./modcontent.zip");
+            System.IO.Compression.ZipFile.CreateFromDirectory(ContentDirectory, "./modcontent.zip");
+
+            byte[] content = File.ReadAllBytes("./modcontent.zip");
+
+            if(content.Length > 100000000)
+            {
+                Console.WriteLine("The size of mod zip is too large, it should be under 95.36MiB(100000000 bytes in exact)");
+                return (int)ExitCodes.SizeTooLarge;
             }
 
-            var handle = SteamUGC.CreateItem(new AppId_t(322330), EWorkshopFileType.k_EWorkshopFileTypeCommunity);
+            if (!Start(APP_ID)) {
+                Console.WriteLine("Steam is not running...");
+                return (int)ExitCodes.InitSteamFailed;
+            }
+
+            SteamRemoteStorage.FileWrite("mod_publish_data_file.zip", content, content.Length);
+            SteamRemoteStorage.FileDelete("mod_publish_preview.jpg");
+
+            var handle = SteamUGC.CreateItem(APP_GAME,
+                EWorkshopFileType.k_EWorkshopFileTypeCommunity);
 
             new CallResult<CreateItemResult_t>(OnCreateItemFinished).Set(handle);
-            System.Threading.Thread.Sleep(1500);
+
+            Steam.Run();
 
             do
             {
-                if(updateHandle.m_UGCUpdateHandle != 0xfffffffffffffffful)
-                {
-                    System.Threading.Thread.Sleep(200);
-                    SteamUGC.GetItemUpdateProgress(updateHandle, out ulong proceed, out ulong total);
-                    Console.WriteLine($"{(decimal)proceed / total}%\tUploaded {proceed} bytes, {total} in total.");
-                }
+                System.Threading.Thread.Sleep(100);
             } while (!UploadFinished);
+            
+            Stop();
 
             return ExitCode;
         }
