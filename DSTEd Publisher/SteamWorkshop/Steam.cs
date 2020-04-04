@@ -9,7 +9,7 @@ namespace DSTEd.Publisher.SteamWorkshop {
         private static Action[] handles; // TODO handle Observing!
         internal static AppId_t APP_ID       = new AppId_t(245850);
         internal static AppId_t APP_GAME     = new AppId_t(322330);
-
+        private static bool TimeToStop = false;
         public enum ExitCodes : int {
             NoError                        = 0,
             ErrorCodeBase              = unchecked((int) 0xA7FF0000),
@@ -22,6 +22,9 @@ namespace DSTEd.Publisher.SteamWorkshop {
             SubmitWorkshopFail      = ErrorCodeBase + 7,
             InvalidArgument            = ErrorCodeBase + 8, 
             DownLoadFail                = ErrorCodeBase + 9,
+            SetNewContentFail        = ErrorCodeBase + 10,
+            UploadNewContentFail  = ErrorCodeBase + 11,
+            SizeTooLarge                 = ErrorCodeBase + 12,
         }
 
         public static bool Start(AppId_t appId) {
@@ -49,12 +52,18 @@ namespace DSTEd.Publisher.SteamWorkshop {
         }
 
         public static void Stop() {
+            TimeToStop = true;
             SteamAPI.Shutdown();
         }
 
-        private static void Run() {
+        public static void Run() {
             System.Threading.Thread.Sleep(1500);
-            new System.Threading.Thread(() => SteamAPI.RunCallbacks()).Start();
+            new System.Threading.Thread(delegate() {
+                while (!TimeToStop)
+                {
+                    System.Threading.Thread.Sleep(100);
+                    SteamAPI.RunCallbacks();
+                }}).Start();
         }
 
         public static void GetWorkShopItems(uint page = 1, Action<ExitCodes, List<WorkshopItem>, uint, uint> Callback = null) {

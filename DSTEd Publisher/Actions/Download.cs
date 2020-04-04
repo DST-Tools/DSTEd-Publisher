@@ -8,10 +8,21 @@ namespace DSTEd.Publisher.Actions {
     class Download : ActionClass {
         private int ExitCode = (int)Steam.ExitCodes.NoError;
         private string Location;
+        private bool Finished = false;
+
         public Download() {
             this.Name           = "download";
             this.Description    = "Download a Steam-WorkShop item.";
             this.Arguments      = "<ID | Location(optional)>";
+        }
+
+        private void ClearDirectory(string path)
+        {
+            foreach (string dirs in Directory.GetDirectories(path))
+                ClearDirectory(dirs);
+
+            foreach (string file in Directory.GetFiles(path))
+                File.Delete(file);
         }
 
         private void OnDownloadFinished(DownloadItemResult_t result)
@@ -20,6 +31,8 @@ namespace DSTEd.Publisher.Actions {
             {
                 Console.WriteLine($"Download failed, EResult is {result.m_eResult}.");
                 ExitCode = (int)Steam.ExitCodes.DownLoadFail;
+                Finished = true;
+                return;
             }
 
             Console.WriteLine($"Download mod {result.m_nPublishedFileId} succeed.");
@@ -28,13 +41,26 @@ namespace DSTEd.Publisher.Actions {
             {
                 Console.WriteLine("But failed to get info about downloaded mod due to some unknown reason.");
                 ExitCode = (int)Steam.ExitCodes.DownLoadFail;
+                Finished = true;
+                return;
             }
 
             using var modZip = new ZipArchive(new FileStream(zipPath, FileMode.Open));
             Location = Path.GetFullPath(Location);
-            modZip.ExtractToDirectory(Location);
+
+            try
+            {
+                ClearDirectory(Location);
+                modZip.ExtractToDirectory(Location);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                Directory.CreateDirectory(Location);
+                modZip.ExtractToDirectory(Location);
+            }
 
             Console.WriteLine($"Successfully downloaded mod {result.m_nPublishedFileId} to {Location}.");
+            Finished = true;
         }
 
         public override int Run(string[] arguments) {
@@ -60,19 +86,19 @@ namespace DSTEd.Publisher.Actions {
             if (arguments.Length >= 2)
                 Location = arguments[1];
 
+            new Callback<DownloadItemResult_t>(OnDownloadFinished).Register(OnDownloadFinished);
+
             if (!SteamUGC.DownloadItem(new PublishedFileId_t(ID), false))
                 ExitCode = (int)Steam.ExitCodes.DownLoadFail;
 
-            var callback = new Callback<DownloadItemResult_t>(OnDownloadFinished);
-            callback.Register(OnDownloadFinished);
-
-            System.Threading.Thread.Sleep(1500);
-            new System.Threading.Thread(() => SteamAPI.RunCallbacks()).Start();
-
-            SteamAPI.RunCallbacks();
+            Steam.Run();
+            Console.WriteLine("Downloading, please wait.");
+            do
+            {
+                System.Threading.Thread.Sleep(100);
+            } while (!Finished);
 
             Steam.Stop();
-
             return ExitCode;
         }
     }
