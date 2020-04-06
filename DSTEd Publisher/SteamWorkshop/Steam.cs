@@ -12,19 +12,19 @@ namespace DSTEd.Publisher.SteamWorkshop {
         private static bool TimeToStop = false;
         public enum ExitCodes : int {
             NoError                        = 0,
-            ErrorCodeBase              = unchecked((int) 0xA7FF0000),
-            InitSteamFailed             = ErrorCodeBase + 1,
-            SteamIOError                = ErrorCodeBase + 2,
-            QueryWorkshopFail       = ErrorCodeBase + 3,
-            ArgumentsMissing         = ErrorCodeBase + 4,
-            CreateWorkshopFileFail  = ErrorCodeBase + 5,
-            TimedOut                      = ErrorCodeBase + 6,
-            SubmitWorkshopFail      = ErrorCodeBase + 7,
-            InvalidArgument            = ErrorCodeBase + 8, 
-            DownLoadFail                = ErrorCodeBase + 9,
-            SetNewContentFail        = ErrorCodeBase + 10,
-            UploadNewContentFail  = ErrorCodeBase + 11,
-            SizeTooLarge                 = ErrorCodeBase + 12,
+            GenericError              = unchecked((int) 0xA7FF0000),
+            InitSteamFailed             = GenericError - 1,
+            SteamIOError                = GenericError - 2,
+            QueryWorkshopFail       = GenericError - 3,
+            ArgumentsMissing         = GenericError - 4,
+            CreateWorkshopFileFail  = GenericError - 5,
+            TimedOut                      = GenericError - 6,
+            SubmitWorkshopFail      = GenericError - 7,
+            InvalidArgument            = GenericError - 8, 
+            DownLoadFail                = GenericError - 9,
+            SetNewContentFail        = GenericError - 10,
+            UploadNewContentFail  = GenericError - 11,
+            SizeTooLarge                 = GenericError - 12,
         }
 
         public static bool Start(AppId_t appId) {
