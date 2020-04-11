@@ -13,6 +13,7 @@ namespace DSTEd.Publisher {
                 parser.AddHandler(new Status());
                 parser.AddHandler(new List());
                 parser.AddHandler(new Software());
+                parser.AddHandler(new Actions.DSTEd());
 
                 return parser.Parse(args);
             } catch(Exception e) {

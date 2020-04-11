@@ -2,6 +2,7 @@
   "profiles": {
     "DSTEd Publisher": {
       "commandName": "Project",
+      "commandLineArgs": "/dstedinternal List debug",
       "workingDirectory": "$(outdir)",
       "nativeDebugging": true
     }

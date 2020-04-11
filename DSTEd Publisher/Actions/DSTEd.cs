@@ -10,7 +10,6 @@ namespace DSTEd.Publisher.Actions
     /// </summary>
     class DSTEd : ActionClass
     {
-        int Exitcode = 0;//exit with nothing wrong.
         List<DSTEdActions.ActionBase> actions = new List<DSTEdActions.ActionBase>(10);
         public DSTEd()
         {
@@ -30,19 +29,32 @@ namespace DSTEd.Publisher.Actions
                 return (int)ExitCodes.ArgumentsMissing;
             }
 
+
+            actions.Add(new DSTEdActions.List());
+
             foreach (DSTEdActions.ActionBase action in actions)
             {
-                if (string.Compare(action.Name, arguments[0], true) == 0)
+                if (action.Name == arguments[0])
                 {
-                    Console.InputEncoding = Encoding.UTF8;
-                    Console.OutputEncoding = Encoding.UTF8;
+                    Console.InputEncoding = Encoding.Unicode;
+                    Console.OutputEncoding = Encoding.Unicode;
 
-                    string datajson = ReadLine('\0');
+                    string datajson;
+                    if (arguments.Length >= 2)
+                        datajson = Console.ReadLine();//for debug.
+                    else
+                        datajson = ReadLine('\0');
                     object data = JsonConvert.DeserializeObject(datajson, action.DataType);
 
                     int ret = (int)action.Do(data);
-                    Console.WriteLine(JsonConvert.SerializeObject(action.ResultObject, Formatting.None));
 
+                    string outJson;
+                    if (arguments.Length >= 2)
+                        outJson = JsonConvert.SerializeObject(action.ResultObject, Formatting.Indented);//debug
+                    else
+                        outJson = JsonConvert.SerializeObject(action.ResultObject, Formatting.None);
+                    Console.Write(outJson);
+                    //Console.Write('\0');
                     return ret;
                 }
             }

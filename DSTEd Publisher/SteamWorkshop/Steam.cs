@@ -39,7 +39,6 @@ namespace DSTEd.Publisher.SteamWorkshop {
                 using var appid_txt = new StreamWriter(new FileStream(@".\steam_appid.txt", FileMode.CreateNew));
                 appid_txt.WriteLine(appId.m_AppId);
                 appid_txt.Flush();
-                throw;
             }
 
             bool result = SteamAPI.Init();

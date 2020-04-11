@@ -57,10 +57,10 @@ namespace DSTEd.Publisher.DSTEdActions
                     TimeCreated = detail.m_rtimeCreated,
                     TimeUpdated = detail.m_rtimeUpdated,
                     Title = detail.m_rgchTitle,
-                    URL = new Uri(detail.m_rgchURL, UriKind.Absolute),
                     Visibility = detail.m_eVisibility,
                     VotesDown = detail.m_unVotesDown,
-                    VotesUp = detail.m_unVotesUp
+                    VotesUp = detail.m_unVotesUp,
+                    URL = detail.m_rgchURL
                 };
             }
 
@@ -104,7 +104,8 @@ namespace DSTEd.Publisher.DSTEdActions
                     );
                 SteamUGC.SetSearchText(handle, data.SearchText);
             }
-
+            if (handle.m_UGCQueryHandle == 0xFFFFFFFFFFFFFFFF) 
+                return Steam.ExitCodes.InvalidArgument;
             SteamUGC.SetReturnAdditionalPreviews(handle, true);
             SteamUGC.SetReturnKeyValueTags(handle,true);
             SteamUGC.SetReturnLongDescription(handle, true);
@@ -123,7 +124,8 @@ namespace DSTEd.Publisher.DSTEdActions
             } while (!AllAsyncOperationsFinished);
 
             ResultObject = QueryResult;
-
+            SteamUGC.ReleaseQueryUGCRequest(handle);
+            Steam.Stop();
             return ExitCode;
         }
     }

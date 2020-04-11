@@ -4,19 +4,8 @@ using System.Collections.Generic;
 using Steamworks;
 namespace DSTEd.Publisher.DSTEdActions
 {
-    [Serializable]
-    internal class UploadData
-    {
-        public readonly string Title;
-        public readonly string Description;
-        public readonly string PreviewImage;
-        public readonly string ContentDirectory;
-        public readonly string ItemLanguage;
 
-        public readonly List<string> tags;
-
-    }
-
+    #region OutputData
     /// <summary>
     /// This will be serialized to send it back to DSTEd main program
     /// </summary>
@@ -43,7 +32,7 @@ namespace DSTEd.Publisher.DSTEdActions
         public string Title;
         public string Description;
         public string Tags;
-        public Uri URL;
+        public string URL;
 
     }
     [Serializable]
@@ -55,6 +44,11 @@ namespace DSTEd.Publisher.DSTEdActions
         public EResult FailureReason = EResult.k_EResultOK;
         public bool IsIOFailure = false;
     }
+
+    #endregion
+
+    #region InputData
+#pragma warning disable CS0649
     [Serializable]
     internal class QueryPublishData
     {
@@ -63,4 +57,19 @@ namespace DSTEd.Publisher.DSTEdActions
         public string SearchText;// only works while querying whole workshop
         public string Language;// can be null, english result will be returned if null. DO NOT SET string.Empty
     }
+
+    [Serializable]
+    internal class UploadData
+    {
+        public readonly string Title;
+        public readonly string Description;
+        public readonly string PreviewImage;
+        public readonly string ContentDirectory;
+        public readonly string ItemLanguage;
+
+        public readonly List<string> tags;
+
+    }
+
+    #endregion
 }
