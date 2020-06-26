@@ -4,6 +4,11 @@ VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSTEd Publisher", "DSTEd Publisher\DSTEd Publisher.csproj", "{CE06C043-55B1-45C4-B26C-F15E927271C5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Preferred codestyle", "Preferred codestyle", "{9CC11793-986A-464D-B670-D28BB7DE14F0}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
