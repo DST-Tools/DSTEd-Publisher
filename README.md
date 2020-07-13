@@ -9,3 +9,7 @@ What can it do
 2. List your published mod by `List` command, just type `./publisher --list`
 
 3. Download mod without subcribing it. `./publisher download MOD_ID`
+
+TODOs:
+1. Better intergration with [DSTED-C](https://github.com/DST-Tools/DSTEd-C)
+  - Upload a mod with more detailed information.
