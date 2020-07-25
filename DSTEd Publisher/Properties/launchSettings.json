@@ -2,9 +2,9 @@
   "profiles": {
     "DSTEd Publisher": {
       "commandName": "Project",
-      "commandLineArgs": "/dstedinternal List debug",
+      "commandLineArgs": "/update fa_publish\\ 1579583001",
       "workingDirectory": "$(outdir)",
-      "nativeDebugging": true
+      "nativeDebugging": false
     }
   }
 }

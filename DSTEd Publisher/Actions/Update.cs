@@ -6,6 +6,7 @@ namespace DSTEd.Publisher.Actions {
     class Update : ActionClass {
         private int ExitCode = 0;
         private bool Finished = false;
+		private CallResult<RemoteStorageUpdatePublishedFileResult_t> update_result;
         //private string Preview;
         public Update() {
             this.Name           = "update";
@@ -44,6 +45,9 @@ namespace DSTEd.Publisher.Actions {
 
             if(result.m_bUserNeedsToAcceptWorkshopLegalAgreement)
                 Console.WriteLine("You need to accept Steam Workshop Legal Aggrement.");
+
+			Console.WriteLine($"Update mod (ID: {result.m_nPublishedFileId}) finished");
+
             Finished = true;
         }
 
@@ -95,8 +99,8 @@ namespace DSTEd.Publisher.Actions {
 
             var commitHandle = SteamRemoteStorage.CommitPublishedFileUpdate(updateHandle);
 
-            var update = new CallResult<RemoteStorageUpdatePublishedFileResult_t>(OnUpdateFinished);
-            update.Set(commitHandle);
+            update_result = new CallResult<RemoteStorageUpdatePublishedFileResult_t>(OnUpdateFinished);
+            update_result.Set(commitHandle);
             // -------------------end----------------------------
 
             Steam.Run();
@@ -104,7 +108,7 @@ namespace DSTEd.Publisher.Actions {
             do
             {
                 System.Threading.Thread.Sleep(100);
-            } while (Finished);
+            } while (!Finished);
 
             Steam.Stop();
 
